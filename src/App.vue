@@ -1,85 +1,113 @@
-<script setup>
-import { RouterLink, RouterView } from 'vue-router'
-import HelloWorld from './components/HelloWorld.vue'
-</script>
-
 <template>
-  <header>
-    <img alt="Vue logo" class="logo" src="@/assets/logo.svg" width="125" height="125" />
-
-    <div class="wrapper">
-      <HelloWorld msg="You did it!" />
-
-      <nav>
-        <RouterLink to="/">Home</RouterLink>
-        <RouterLink to="/about">About</RouterLink>
-      </nav>
-    </div>
-  </header>
-
-  <RouterView />
+  <div id="app" class="grid-box">
+    <header class="mt-3">
+      <div class="container">
+        {{ alerts }}
+        <div class="row justify-content-between">
+          <div class="col flex-norm">
+            <div class="h3">Sample site</div>
+            <div class="">About some and other products</div>
+          </div>
+          <div class="col flex-norm">
+            <div>In Cart: {{ cartCount }}</div>
+            <div>Total: {{ cartTotal }}</div>
+          </div>
+        </div>
+        <hr />
+        <nav class="navbar navbar-expand p-0">
+          <ul class="navbar-nav">
+            <li v-for="item in menuItems" :key="item.route" class="nav-item">
+              <router-link
+                :to="{ name: item.route }"
+                class="nav-link"
+                active-class="active"
+                :exact="item.exact"
+                >{{ item.title }}</router-link
+              >
+            </li>
+          </ul>
+        </nav>
+        <hr />
+      </div>
+    </header>
+    <section>
+      <div class="container">
+        <router-view v-slot="{ Component }">
+          <transition name="slide" mode="out-in">
+            <component :is="Component" />
+          </transition>
+        </router-view>
+      </div>
+    </section>
+    <footer class="mb-3">
+      <div class="container">
+        <hr />
+        <div>&copy; Rights not found</div>
+      </div>
+    </footer>
+  </div>
 </template>
 
-<style scoped>
-header {
-  line-height: 1.5;
-  max-height: 100vh;
-}
+<script>
+import { mapGetters } from 'vuex'
 
-.logo {
-  display: block;
-  margin: 0 auto 2rem;
-}
-
-nav {
-  width: 100%;
-  font-size: 12px;
-  text-align: center;
-  margin-top: 2rem;
-}
-
-nav a.router-link-exact-active {
-  color: var(--color-text);
-}
-
-nav a.router-link-exact-active:hover {
-  background-color: transparent;
-}
-
-nav a {
-  display: inline-block;
-  padding: 0 1rem;
-  border-left: 1px solid var(--color-border);
-}
-
-nav a:first-of-type {
-  border: 0;
-}
-
-@media (min-width: 1024px) {
-  header {
-    display: flex;
-    place-items: center;
-    padding-right: calc(var(--section-gap) / 2);
+export default {
+  data() {
+    return {
+      menuItems: [
+        { route: 'products', title: 'Products', exact: true },
+        { route: 'cart', title: 'Cart', exact: true },
+        { route: 'checkout', title: 'Checkout', exact: true }
+        /* { route: 'office', title: 'Office', exact: false } */
+      ]
+    }
+  },
+  computed: {
+    ...mapGetters('cart', { cartCount: 'totalCnt', cartTotal: 'totalSum' }),
+    ...mapGetters('alerts', { alerts: 'all' })
   }
+}
+</script>
 
-  .logo {
-    margin: 0 2rem 0 0;
+<style>
+.grid-box {
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  min-height: 100vh;
+}
+
+.flex-norm {
+  flex: 0 1 auto !important;
+  width: auto !important;
+}
+
+a.active {
+  color: red !important;
+}
+
+.slide-enter-active {
+  animation: slideIn 0.3s;
+}
+
+.slide-leave-active {
+  animation: slideOut 0.3s;
+}
+
+@keyframes slideIn {
+  from {
+    transform: rotateY(90deg);
   }
-
-  header .wrapper {
-    display: flex;
-    place-items: flex-start;
-    flex-wrap: wrap;
+  to {
+    transform: rotateY(0deg);
   }
+}
 
-  nav {
-    text-align: left;
-    margin-left: -1rem;
-    font-size: 1rem;
-
-    padding: 1rem 0;
-    margin-top: 1rem;
+@keyframes slideOut {
+  from {
+    transform: rotateY(0deg);
+  }
+  to {
+    transform: rotateY(90deg);
   }
 }
 </style>
