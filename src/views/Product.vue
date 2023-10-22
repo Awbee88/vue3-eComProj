@@ -6,7 +6,7 @@
       {{ product.price }}
     </div>
     <hr />
-    <product-controls :id="id"></product-controls>
+    <ProductControls :id="id"></ProductControls>
     <hr />
     <router-link :to="{ name: 'products' }"> Back to products </router-link>
     <p>
@@ -30,29 +30,40 @@
       perferendis architecto, ab magnam.
     </p>
   </div>
-  <app-404 v-else />
+  <App404 v-else />
 </template>
-<script>
-import App404 from '@/components/E404'
-import ProductControls from '@/components/ProductControls'
-import { mapGetters } from 'vuex'
 
-export default {
-  components: {
-    App404,
-    ProductControls
-  },
-  computed: {
-    ...mapGetters('products', { productProxy: 'one' }),
-    id() {
-      return +this.$route.params.id // may be better
-    },
-    product() {
-      return this.productProxy(this.id)
-    },
-    hasProduct() {
-      return typeof this.product !== 'undefined'
-    }
-  }
-}
+<script setup>
+import App404 from '@/components/E404Page.vue'
+import ProductControls from '@/components/ProductControls.vue'
+
+import { useProductsStore } from '@/stores/products'
+import { useRoute } from 'vue-router'
+import { computed } from 'vue'
+
+const productsStore = useProductsStore();
+const route = useRoute();
+
+const id = computed(() => +route.params.id)
+const product = computed(() => productsStore.one(id))
+const hasProduct = computed(() => typeof product.value !== 'undefined')
+
+// export default {
+//   components: {
+//     App404,
+//     ProductControls
+//   },
+//   computed: {
+//     ...mapGetters('products', { productProxy: 'one' }),
+//     id() {
+//       return +this.$route.params.id // may be better
+//     },
+//     product() {
+//       return this.productProxy(this.id)
+//     },
+//     hasProduct() {
+//       return typeof this.product !== 'undefined'
+//     }
+//   }
+// }
 </script>

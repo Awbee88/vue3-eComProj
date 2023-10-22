@@ -10,7 +10,9 @@
         </router-link>
       </ul>
     </div>
-    <div class="col col-9"></div>
+    <div class="col col-9">
+      <router-view></router-view>
+    </div>
   </div>
 </template>
 

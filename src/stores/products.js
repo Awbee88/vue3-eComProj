@@ -5,7 +5,7 @@ import { defineStore } from 'pinia'
 export const useProductsStore = defineStore('products', () => {
   const items = ref(null)
   const all = computed(() => items.value)
-  const one = computed((id) => items.value.find((pr) => pr.id == id))
+  const one = (id) => items.value.find((pr) => pr.id == id);
 
   async function load() {
     let products = await productsApi.all()

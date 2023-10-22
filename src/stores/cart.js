@@ -1,15 +1,17 @@
 import { ref, computed } from 'vue'
 import { defineStore } from 'pinia'
 import { useProductsStore } from './products'
+import { useAlertsStore } from './alerts'
 import * as cartApi from '@/api/cart.js'
 
 export const useCartStore = defineStore('cart', () => {
-  const productsStore = useProductsStore()
+  const productsStore = useProductsStore();
+  const alertsStore = useAlertsStore();
 
   // state
-  const products = ref([])
-  const proccessId = ref([])
-  const token = ref(null)
+  const products = ref([]);
+  const proccessId = ref([]);
+  const token = ref(null);
 
   // getters
   const productsDetailed = computed(() =>
@@ -22,23 +24,27 @@ export const useCartStore = defineStore('cart', () => {
         price
       }
     })
-  )
+  );
   const totalSum = computed(() =>
-    productsDetailed.reduce((total, pr) => {
+    productsDetailed.value.reduce((total, pr) => {
       return total + pr.price * pr.cnt
     }, 0)
-  )
-  const totalCnt = computed(() => products.value.length)
-  const inProccess = computed((id) => proccessId.value.includes(id))
-  const canAdd = computed((id) => !inCart(id) && !inProccess(id))
-  const canUpdate = computed((id) => inCart(id) && !inProccess(id))
-  const inCart = computed((id) => index(id) !== -1)
-  const index = computed((id) => products.value.findIndex((pr) => pr.id === id))
-  const item = computed((id) => {
-    let ind = index(id)
-    return ind === -1 ? null : products.value[ind]
-  })
-  const itemCnt = computed((id) => item(id).cnt)
+  );
+  const index = (id) =>  {
+    return products.value.findIndex((pr) => pr.id === id);
+  };
+  const inCart = (id) => {
+    return index(id) !== -1;
+  };
+  const totalCnt = computed(() => products.value.length);
+  const inProccess = (id) => proccessId.value.includes(id);
+  const canAdd = (id) => !inCart(id) && !inProccess(id);
+  const canUpdate = (id) => inCart(id) && !inProccess(id);
+  const item = (id) => {
+    let ind = index(id);
+    return ind === -1 ? null : products.value[ind];
+  };
+  const itemCnt = (id) => item(id).cnt;
 
   // actions
   async function load() {
@@ -57,26 +63,26 @@ export const useCartStore = defineStore('cart', () => {
     if (canAdd(id)) {
       proccessId.value.push(id)
 
-      let res = await cartApi.add(token.value, id)
+      let {res, data} = await cartApi.add(token.value, id)
 
-      if (res === true) {
+      if (res && data) {
         products.value.push({ id, cnt: 1 })
       }
 
-      proccessId.value = proccessId.value.filter((id) => id !== rid)
+      proccessId.value = proccessId.value.filter((rid) => rid !== id)
     }
   }
   async function remove({ id }) {
     if (canUpdate(id)) {
       proccessId.value.push(id)
 
-      let res = await cartApi.remove(token.value, id)
+      let {res, data} = await cartApi.remove(token.value, id)
 
-      if (res === true) {
+      if (res && data) {
         products.value.splice(index(id), 1)
       }
 
-      proccessId.value = proccessId.value.filter((id) => id !== rid)
+      proccessId.value = proccessId.value.filter((rid) => rid !== id)
     }
   }
   async function setCnt({ id, cnt }) {
@@ -84,13 +90,13 @@ export const useCartStore = defineStore('cart', () => {
       proccessId.value.push(id)
 
       let validCnt = Math.max(1, cnt)
-      let res = await cartApi.change(token.value, id, validCnt)
+      let {res, data} = await cartApi.change(token.value, id, validCnt)
 
-      if (res === true) {
+      if (res && data) {
         products.value[index(id)].cnt = validCnt
       }
 
-      proccessId.value = proccessId.value.filter((id) => id !== rid)
+      proccessId.value = proccessId.value.filter((rid) => rid !== id)
     }
   }
 
@@ -111,7 +117,7 @@ export const useCartStore = defineStore('cart', () => {
     load,
     add,
     remove,
-    setCnt
+    setCnt,
   }
 })
 

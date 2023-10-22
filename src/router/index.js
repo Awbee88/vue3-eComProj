@@ -1,13 +1,15 @@
+import { useUserStore } from '@/stores/user'
 import { createRouter, createWebHistory } from 'vue-router'
 
-import ProductsList from '@/views/ProductsList'
-import Product from '@/views/Product'
-import Cart from '@/views/Cart'
-import Checkout from '@/views/Checkout'
-import E404 from '@/views/E404'
-import OfficeBase from '@/views/office/Base'
-import OfficeIndex from '@/views/office/Index'
-import OfficeOrders from '@/views/office/Orders'
+import ProductsList from '@/views/ProductsList.vue'
+import Product from '@/views/Product.vue'
+import Cart from '@/views/Cart.vue'
+import Checkout from '@/views/Checkout.vue'
+import E404 from '@/views/E404.vue'
+import Login from '@/views/Login.vue'
+import OfficeBase from '@/views/office/Base.vue'
+import OfficeIndex from '@/views/office/Index.vue'
+import OfficeOrders from '@/views/office/Orders.vue'
 
 let routes = [
   {
@@ -33,11 +35,29 @@ let routes = [
   {
     name: 'login',
     path: '/login',
-    component: E404
+    component: Login,
+    beforeEnter: async(to, from, next) => {
+      const userStore = useUserStore();
+      await userStore.isReadyLogin;
+      userStore.isLogin ? next({name: 'office'}) : next();
+    }
   },
   {
     path: '/office',
-    component: OfficeBase
+    component: OfficeBase,
+    meta: { auth: true },
+    children: [
+      {
+        name: 'office',
+        path: '',
+        component: OfficeIndex
+      },
+      {
+        name: 'office-orders',
+        path: 'orders',
+        component: OfficeOrders
+      }
+    ]
   },
   {
     path: '/:any(.*)',
@@ -49,5 +69,15 @@ const router = createRouter({
   history: createWebHistory(),
   routes
 })
+
+router.beforeEach((to, from, next) => {
+  const userStore = useUserStore();
+
+  if(to.meta.auth && !userStore.isLogin) {
+    next({name: 'login'})
+  } else {
+    next();
+  }
+});
 
 export default router

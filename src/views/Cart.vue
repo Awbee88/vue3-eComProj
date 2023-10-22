@@ -14,7 +14,7 @@
           </tr>
         </thead>
         <tbody>
-          <tr v-for="product in products" :key="product.id">
+          <tr v-for="product in cartStore.productsDetailed" :key="product.id">
             <td>{{ product.title }}</td>
             <td>{{ product.price }}</td>
             <td>{{ product.cnt }}</td>
@@ -23,24 +23,24 @@
               <button
                 type="button"
                 class="btn btn-warning mr-1"
-                :disabled="inProccess(product.id) || product.cnt < 2"
-                @click="setCnt({ id: product.id, cnt: product.cnt - 1 })"
+                :disabled="cartStore.inProccess(product.id) || product.cnt < 2"
+                @click="cartStore.setCnt({ id: product.id, cnt: product.cnt - 1 })"
               >
                 -
               </button>
               <button
                 type="button"
                 class="btn btn-success mr-1"
-                @click="setCnt({ id: product.id, cnt: product.cnt + 1 })"
-                :disabled="inProccess(product.id)"
+                @click="cartStore.setCnt({ id: product.id, cnt: product.cnt + 1 })"
+                :disabled="cartStore.inProccess(product.id)"
               >
                 +
               </button>
               <button
                 type="button"
                 class="btn btn-danger"
-                @click="remove({ id: product.id })"
-                :disabled="inProccess(product.id)"
+                @click="cartStore.remove({ id: product.id })"
+                :disabled="cartStore.inProccess(product.id)"
               >
                 X
               </button>
@@ -55,21 +55,26 @@
   </div>
 </template>
 
-<script>
-import { mapGetters, mapActions } from 'vuex'
+<script setup>
+import { useCartStore } from '@/stores/cart'
+import { computed } from 'vue'
 
-export default {
-  computed: {
-    ...mapGetters('cart', {
-      products: 'productsDetailed',
-      inProccess: 'inProccess'
-    }),
-    hasProducts() {
-      return this.products.length > 0
-    }
-  },
-  methods: {
-    ...mapActions('cart', ['setCnt', 'remove'])
-  }
-}
+const cartStore = useCartStore()
+
+const hasProducts = computed(() => cartStore.productsDetailed.length > 0)
+
+// export default {
+//   computed: {
+//     ...mapGetters('cart', {
+//       products: 'productsDetailed',
+//       inProccess: 'inProccess'
+//     }),
+//     hasProducts() {
+//       return this.products.length > 0
+//     }
+//   },
+//   methods: {
+//     ...mapActions('cart', ['setCnt', 'remove'])
+//   }
+// }
 </script>
